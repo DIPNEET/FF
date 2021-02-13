@@ -3,15 +3,16 @@ var roller ;
 var obstacle ;
 var enemiesGroup,energyGroup;
 var gs=0;
-var box,bg,player,start,bonus1,bonus2,bonus3,bonus4,ob1,ob2,ob3;
+var score=0;
+var box,bg,bg1,player1,start,start1,bonus1,bonus2,bonus3,bonus4,ob1,ob2,ob3;
 
 function preload(){
   
-  bg=loadImage("Assets/bg.png")
+  bg1=loadImage("Assets/bg.png")
   box=loadAnimation("Assets/box.png","Assets/box_2.png","Assets/box.png")
-  player=loadAnimation("Assets/p1.png","Assets/p2.png")
+  player1=loadAnimation("Assets/p1.png","Assets/p2.png")
 
-  start=loadImage("Assets/start.png")
+  start1=loadImage("Assets/start.png")
 
   bonus1=loadImage("Assets/bonus1.png")
   bonus2=loadImage("Assets/bonus2.png")
@@ -32,13 +33,13 @@ function setup() {
 createCanvas(400,400);
 
 bg = createSprite(200,200,50,50);
-bg.addImage(bg)
+bg.addImage(bg1)
 bg.scale=3
-bg.velocityY=2
 
-roller = createSprite(200,366,100,20);
-roller.addAnimation("box",box)
-roller.scale=0.5
+
+// roller = createSprite(200,366,100,20);
+// roller.addAnimation("box",box)
+// roller.scale=0.5
 
 
 
@@ -47,10 +48,10 @@ energyGroup = new Group()
 
 
 player = createSprite(200,350,50,50);
-player.addAnimation("player",player)
+player.addAnimation("player",player1)
 
-var start=createSprite(200,200,50,50)
-start.addImage("start",start)
+start=createSprite(200,200,50,50)
+start.addImage("start",start1)
 start.scale=0.5
 
 }
@@ -58,25 +59,37 @@ start.scale=0.5
 function draw() {
   
   background("black")
-
-  if(bg.y==0){
-    bg.y=bg.width/2
-  }
+  drawSprites();
+	  
+  
   if(gs===0){
 
-    player.visible=false;
-    roller.visible=false;
+    
+	start.visible = true;
+	player.visible = false;
+	
+	enemiesGroup.destroyEach();
+	energyGroup.destroyEach();
 
+	bg.velocityY=0
+	player.velocityY=0
+	
+
+	
+	
     if(mousePressedOver(start)){
       gs=1
+	  score=0
       start.visible=false;
     }
 
   }
   else if(gs==1){
-    
+    bg.velocityY=1
+	
+
 	player.visible=true;
-	roller.visible=true;
+	//roller.visible=true;
 	
 	
 	if(keyDown("left")){
@@ -87,15 +100,16 @@ function draw() {
 	}
 	if(keyDown("down")){
 		player.y=player.y+5;
+		player.velocityY=0
 	}
 		
 	if(keyDown("up")){
-	player.velocityY = -4;
+	player.velocityY = -2;
 	}
 	
 	
-	roller.x = player.x;
-	roller.y = player.y +20;
+	//roller.x = player.x;
+	//roller.y = player.y +20;
 	
 	
 	camera.position.y = player.y;
@@ -104,23 +118,41 @@ function draw() {
 	
 	enemies()
 	energy()
-  
-	// if(enemiesGroup.collide(player)){
-	// enemiesGroup.destroyEach()
-	// }
-	// if(energyGroup.collide(player)){
-	// energyGroup.destroyEach()
-	// }
+    
+	textSize(22); 
+	fill("red")
+	text("Score:"+score,player.x+80,player.y-170);
+
+	if(enemiesGroup.collide(player)){
+		score = score-10;
+		enemiesGroup.destroyEach()
+	}
+	if(energyGroup.collide(player)){
+		score = score+10;
+		energyGroup.destroyEach()
+	}
+	
+  	 
+    if(score<= -20){
+	
+	gs = 0;
+	start.visible=true
+    start.x = player.x;
+	start.y = player.y;
+	
+	 }
   }
-   drawSprites();
+
+    
   
 }
 
 function enemies (){
-	if(frameCount%90===0){
+	if(frameCount%70===0){
 
 		var x = player.x + random(-200,+200)+70;
 		var y = player.y - random(40,80)+80;
+
 		obstacle = createSprite(x,y,100,30);
 
 		var o=Math.round(random(1,3))
@@ -131,18 +163,19 @@ function enemies (){
 		}
 		
 		obstacle.scale=0.3
-		enemiesGroup.add("ob",obstacle);
+		enemiesGroup.add(obstacle);
 		obstacle.lifetime = 200;
 
 	}
 }
 function energy(){
 
-	if(frameCount%105===0){
+	if(frameCount%90===0){
 		
 		var x = random(10,1000)+40;
 		var y = player.y-random(80,100)+40;
 		var e = createSprite(x,y,50,30)
+
 		var o=Math.round(random(1,6))
 		switch(o){
 			case 1:e.addImage(bonus1); break;
